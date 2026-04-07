@@ -11,7 +11,6 @@
  * - call_paid_api: Execute a discovered endpoint (with x402 v2 payment handling)
  *
  * Environment variables:
- * - ENTROUTE_API_URL: API base URL (default: http://localhost:8787)
  * - EVM_PRIVATE_KEY: Hex private key (0x...) for automatic x402 payments
  * - MAX_PAYMENT_PER_REQUEST: Max USD per request (default: 0.05)
  */
@@ -38,7 +37,7 @@ const paymentConfigured = !!evmPrivateKey;
 
 // Initialize client with optional payment support
 const client = new EntRouteClient({
-  baseUrl: process.env.ENTROUTE_API_URL || 'http://localhost:8787',
+  baseUrl: 'https://api.entroute.com',
   clientId: 'mcp-server',
   autoReportOutcomes: true,
   evmPrivateKey: evmPrivateKey,
@@ -74,14 +73,24 @@ Use this after discover_paid_api to execute the request.
 Automatically handles x402 payments up to $${maxPaymentPerRequest.toFixed(2)} per request using the configured wallet.
 
 IMPORTANT: You must first use discover_paid_api to find an endpoint.
-Then use the endpoint_id from the discovery result.`
+Then use the endpoint_id from the discovery result.
+
+Trust & safety:
+- Payments are capped at $${maxPaymentPerRequest.toFixed(2)} per request. Calls exceeding this are rejected.
+- Private keys never leave this machine. Payment signatures are created locally.
+- EntRoute verifies that endpoints return valid 402 responses every 10 minutes, but does not guarantee response quality or accuracy. Treat results like any third-party API.
+- Prefer endpoints with high success rates (>95%) and recent verification timestamps.`
   : `Call a previously discovered API endpoint.
 
 Use this after discover_paid_api to execute the request.
 Payment-required endpoints (402) will return an error with payment details since no wallet is configured.
 
 IMPORTANT: You must first use discover_paid_api to find an endpoint.
-Then use the endpoint_id from the discovery result.`;
+Then use the endpoint_id from the discovery result.
+
+Trust & safety:
+- No wallet is configured, so paid endpoints will return payment details without executing.
+- EntRoute verifies that endpoints return valid 402 responses every 10 minutes, but does not guarantee response quality or accuracy.`;
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -98,7 +107,13 @@ Use this to find APIs before calling them. The results include:
 - Success rate and latency metrics
 - Provider information
 
-After discovering, you can use call_paid_api to execute the endpoint.`,
+After discovering, you can use call_paid_api to execute the endpoint.
+
+Trust & safety:
+- "Verified" means the endpoint returns a valid x402 402 response -- it does not guarantee the quality or accuracy of the data returned after payment.
+- Endpoints are probed every 10 minutes. Check last_verified and success_rate to gauge reliability.
+- Fallback endpoints (unverified) have failed recent verification checks -- use with caution.
+- Prefer endpoints with success_rate >95% and verification within the last 24 hours.`,
         inputSchema: {
           type: 'object',
           properties: {
@@ -137,7 +152,9 @@ After discovering, you can use call_paid_api to execute the endpoint.`,
         description: `List available API capability types.
 
 Use this to explore what kinds of APIs are available in the registry.
-You can filter by tag (e.g., "weather", "translation") or search by keyword.`,
+You can filter by tag (e.g., "weather", "translation") or search by keyword.
+
+Note: A capability existing does not mean verified endpoints are available for it. Use discover_paid_api to check for live endpoints.`,
         inputSchema: {
           type: 'object',
           properties: {
@@ -517,7 +534,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error('EntRoute MCP server running on stdio');
-  console.error(`API URL: ${process.env.ENTROUTE_API_URL || 'http://localhost:8787'}`);
+  console.error('API URL: https://api.entroute.com');
 }
 
 main().catch((error) => {
