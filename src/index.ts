@@ -56,7 +56,7 @@ const endpointCache = new Map<string, RankedEndpoint>();
 const server = new Server(
   {
     name: 'entroute',
-    version: '0.1.3',
+    version: '0.1.6',
   },
   {
     capabilities: {
@@ -386,35 +386,32 @@ async function handleCallApi(args: {
   }
 
   try {
-    // Build query params into body for GET requests if needed
+    const method = args.method || endpoint.method;
     let requestBody = args.body;
+    const effectiveEndpoint = { ...endpoint };
+
     if (args.query_params && Object.keys(args.query_params).length > 0) {
-      if (endpoint.method === 'GET' || args.method === 'GET') {
-        // For GET, merge query_params into body so buildRequestUrl handles them
+      if (method === 'GET') {
+        // For GET, merge into body so SDK's buildRequestUrl appends them as query params
         requestBody = { ...requestBody, ...args.query_params };
+      } else {
+        // For non-GET, append query params to URL directly
+        const params = new URLSearchParams(args.query_params);
+        effectiveEndpoint.url += (effectiveEndpoint.url.includes('?') ? '&' : '?') + params.toString();
       }
     }
 
     // Use SDK's callEndpoint which handles x402 v2 payments automatically
-    const result = await client.callEndpoint(endpoint, {
-      buildRequest: (ep) => {
-        let url = ep.url;
-        // Append query params for non-GET methods
-        if (args.query_params && Object.keys(args.query_params).length > 0 && ep.method !== 'GET') {
-          const params = new URLSearchParams(args.query_params);
-          url += (url.includes('?') ? '&' : '?') + params.toString();
-        }
-
-        return {
-          method: args.method || ep.method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...args.headers,
-          },
-          body: args.body ? JSON.stringify(args.body) : undefined,
-        };
-      },
+    const result = await client.callEndpoint(effectiveEndpoint, {
+      buildRequest: (ep) => ({
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          ...args.headers,
+        },
+        body: args.body ? JSON.stringify(args.body) : undefined,
+      }),
       body: requestBody,
       timeout: 30000,
       autoPay: paymentConfigured,

@@ -2,7 +2,7 @@
 
 MCP Server for AI agents to discover and call pay-per-request APIs via [EntRoute](https://entroute.com).
 
-Give Claude, Cursor, Windsurf, or any MCP-compatible agent access to 350+ verified x402 API endpoints across 110+ capabilities — DeFi prices, web search, prediction markets, news, and more.
+Give Claude, Cursor, Windsurf, or any MCP-compatible agent access to 350+ verified x402 API endpoints across 110+ capabilities -- DeFi prices, web search, prediction markets, news, and more.
 
 ## Install
 
@@ -18,10 +18,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "entroute": {
       "command": "npx",
-      "args": ["@entroute/mcp-server"],
-      "env": {
-        "ENTROUTE_API_URL": "https://api.entroute.com"
-      }
+      "args": ["@entroute/mcp-server"]
     }
   }
 }
@@ -37,7 +34,7 @@ Find ranked, verified API endpoints for any capability. Supports natural languag
 
 ```
 "Find me an API to get the current price of ETH"
-→ Returns ranked endpoints with pricing, success rates, and latency metrics
+-> Returns ranked endpoints with pricing, success rates, and latency metrics
 ```
 
 ### `list_capabilities`
@@ -55,14 +52,13 @@ EVM_PRIVATE_KEY=0x...          # Wallet private key for USDC payments on Base
 MAX_PAYMENT_PER_REQUEST=0.05   # Max USD per request (default: $0.05)
 ```
 
-Without a wallet, the server still discovers endpoints — you just can't auto-pay for 402-protected ones.
+Without a wallet, the server still discovers endpoints -- you just can't auto-pay for 402-protected ones.
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ENTROUTE_API_URL` | `https://api.entroute.com` | EntRoute API base URL |
-| `EVM_PRIVATE_KEY` | — | Hex private key for x402 payments |
+| `EVM_PRIVATE_KEY` | -- | Hex private key for x402 payments |
 | `MAX_PAYMENT_PER_REQUEST` | `0.05` | Spending cap per request in USD |
 
 ## Example Usage
@@ -80,13 +76,13 @@ The agent will use `discover_paid_api` to find endpoints, show you the options w
 
 EntRoute indexes 110+ capabilities across categories including:
 
-- **Finance/DeFi** — token prices, swap quotes, portfolio tracking, yield data
-- **Web** — search, scraping, URL shortening
-- **Identity** — wallet profiles, ENS resolution
-- **AI** — text generation, image generation
-- **News** — search, trending topics
-- **Security** — contract audits, threat intelligence
-- **Prediction** — market data, odds
+- **Finance/DeFi** -- token prices, swap quotes, portfolio tracking, yield data
+- **Web** -- search, scraping, URL shortening
+- **Identity** -- wallet profiles, ENS resolution
+- **AI** -- text generation, image generation
+- **News** -- search, trending topics
+- **Security** -- contract audits, threat intelligence
+- **Prediction** -- market data, odds
 
 Browse all capabilities at [entroute.com/capabilities](https://entroute.com/capabilities).
 

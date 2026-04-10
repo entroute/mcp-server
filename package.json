@@ -1,6 +1,6 @@
 {
   "name": "@entroute/mcp-server",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "MCP Server for AI agents to discover and call pay-per-request APIs via EntRoute",
   "type": "module",
   "main": "./dist/index.js",
